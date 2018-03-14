@@ -19,7 +19,7 @@ Picfunction::Picfunction()
 }
 Picfunction::~Picfunction()
 {
-    delete picf;
+  //  delete picf;
     cout<<"delete picf"<<endl;
 }
 Mat Picfunction::rgb2grey(Mat image)

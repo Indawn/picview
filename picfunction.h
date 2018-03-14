@@ -30,7 +30,7 @@ public:
     Mat rgb2grey(Mat image);
 
 private:
-   Picfunction *picf;
+ //  Picfunction *picf;
 
 };
 

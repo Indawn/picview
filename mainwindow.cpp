@@ -115,5 +115,17 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionGrey_triggered()
 {
+    Mat image0 = imread("D:\\1.jpg");
 
+    Picfunction picf;// = Picfunction.Picfunction();
+    image0 = picf.rgb2grey(image0);
+ //   imshow("iamge",image0);
+    ui->pic_label0->clear();
+       ui->pic_label0->setPixmap(QPixmap::fromImage(cvMat2QImage(image0)));
+    ui->pic_label0->show();
+    //delete picf;
+    /*   */
+ //   int result0 =picf.sum(1,2);
+//    cout<<result0<<endl;
+  //  picf.~Picfunction();
 }
