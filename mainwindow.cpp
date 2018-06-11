@@ -1,13 +1,16 @@
-#include "picfunction.h"
-
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "picfunction.h"
-#include <iostream>
 
-
-#include <QFileDialog>
 #include <QLabel>
+#include <QFileDialog>
+#include <iostream>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+/*
+
+#include <opencv2/core/core.hpp>
+
+
 #include <qtextcodec.h>
 
 #include <QResizeEvent>
@@ -15,29 +18,23 @@
 #include <QTextCodec>
 
 #include <QCoreApplication>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+
 #include <math.h>
 #include <QLabel>
 #include <stdlib.h>
 #include <stdio.h>
 #include <opencv2/ml/ml.hpp>
 #include "zbar.h"
-
-
+using namespace zbar;
+*/
 using namespace std;
 using namespace cv;
-using namespace zbar;
-//using namespace PICF;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-
 }
 
 MainWindow::~MainWindow()
@@ -45,50 +42,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-QImage cvMat2QImage(const cv::Mat& mat)
+void MainWindow::resizeEvent ( QResizeEvent * event )
 {
-    // 8-bits unsigned, NO. OF CHANNELS = 1
-    if(mat.type() == CV_8UC1)
-    {
-        QImage image(mat.cols, mat.rows, QImage::Format_Indexed8);
-        // Set the color table (used to translate colour indexes to qRgb values)
-        image.setColorCount(256);
-        for(int i = 0; i < 256; i++)
-        {
-            image.setColor(i, qRgb(i, i, i));
-        }
-        // Copy input Mat
-        uchar *pSrc = mat.data;
-        for(int row = 0; row < mat.rows; row ++)
-        {
-            uchar *pDest = image.scanLine(row);
-            memcpy(pDest, pSrc, mat.cols);
-            pSrc += mat.step;
-        }
-        return image;
-    }
-    // 8-bits unsigned, NO. OF CHANNELS = 3
-    else if(mat.type() == CV_8UC3)
-    {
-        // Copy input Mat
-        const uchar *pSrc = (const uchar*)mat.data;
-        // Create QImage with same dimensions as input Mat
-        QImage image(pSrc, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
-        return image.rgbSwapped();
-    }
-    else if(mat.type() == CV_8UC4)
-    {
-        // Copy input Mat
-        const uchar *pSrc = (const uchar*)mat.data;
-        // Create QImage with same dimensions as input Mat
-        QImage image(pSrc, mat.cols, mat.rows, mat.step, QImage::Format_ARGB32);
-        return image.copy();
-    }
-    else
-    {
-        return QImage();
-    }
+    scaledmat2label(mat_opened, ui->pic_label0);
+ /*   statusBar()->removeWidget(aixLabel_pencentage);
+    aixLabel_pencentage = new QLabel(QString::number(pecentage*100,10,2)+"%");
+    statusBar()->addWidget(aixLabel_pencentage, 2);
+    */
 }
+
+
+
 
 
 void MainWindow::on_actionClose_triggered()
@@ -98,34 +62,42 @@ void MainWindow::on_actionClose_triggered()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    Mat image0 = imread("D:\\1.jpg");
+    QFileDialog *fileDialog = new QFileDialog(this);//创建一个QFileDialog对象，构造函数中的参数可以有所添加。
+    fileDialog->setWindowTitle(tr("Open"));//设置文件保存对话框的标题
+    fileDialog->setAcceptMode(QFileDialog::AcceptOpen);//设置文件对话框为保存模式
+    fileDialog->setFileMode(QFileDialog::AnyFile);//设置文件对话框弹出的时候显示任何文件，不论是文件夹还是文件
+    fileDialog->setViewMode(QFileDialog::Detail);//文件以详细的形式显示，显示文件名，大小，创建日期等信息；
+    //还有另一种形式QFileDialog::List，这个只是把文件的文件名以列表的形式显示出来
+    fileDialog->setGeometry(10,30,300,200);//设置文件对话框的显示位置
+    fileDialog->setDirectory(".");//设置文件对话框打开时初始打开的位置
+    // fileDialog->setFilter(tr("Image Files(*.jpg *.png)"));//设置文件类型过滤器
+    if(fileDialog->exec() == QDialog::Accepted)//注意使用的是QFileDialog::Accepted或者QDialog::Accepted,不是QFileDialog::Accept
+    {
+        QString  curr_picname = fileDialog->selectedFiles()[0];//得到用户选择的文件名
+        mat_opened = imread(curr_picname.toLocal8Bit().constData());
+        if(mat_opened.data)
+        {
+            scaledmat2label(mat_opened, ui->pic_label0);
+        }
+        /*
+        statusBar()->setVisible(true);
+        statusBar()->removeWidget(aixLabel);
+        statusBar()->removeWidget(aixLabel_pencentage);
+        aixLabel = new QLabel(curr_picname);
+        aixLabel_pencentage = new QLabel(QString::number(pecentage*100,10,2)+"%");
+        statusBar()->setStyleSheet(QString("QStatusBar::item{border: 0px}")); // 设置不显示label的边框
+        statusBar()->addWidget(aixLabel, 1);
+        statusBar()->addWidget(aixLabel_pencentage, 2);
+        */
+    }
 
- //   Picfunction picf;// = Picfunction.Picfunction();
-  //  image0 =picf.rgb2grey(image0);
-    imshow("iamge",image0);
-    ui->pic_label0->clear();
-       ui->pic_label0->setPixmap(QPixmap::fromImage(cvMat2QImage(image0)));
-    ui->pic_label0->show();
-    //delete picf;
-    /*   */
- //   int result0 =picf.sum(1,2);
-//    cout<<result0<<endl;
-  //  picf.~Picfunction();
 }
 
 void MainWindow::on_actionGrey_triggered()
 {
-    Mat image0 = imread("D:\\1.jpg");
-
-    Picfunction picf;// = Picfunction.Picfunction();
-    image0 = picf.rgb2grey(image0);
- //   imshow("iamge",image0);
+    mat_opened = imread("D:\\图片\\background (3).jpg");
     ui->pic_label0->clear();
-       ui->pic_label0->setPixmap(QPixmap::fromImage(cvMat2QImage(image0)));
+       ui->pic_label0->setPixmap(QPixmap::fromImage(cvMat2QImage(mat_opened)));
     ui->pic_label0->show();
-    //delete picf;
-    /*   */
- //   int result0 =picf.sum(1,2);
-//    cout<<result0<<endl;
-  //  picf.~Picfunction();
+
 }

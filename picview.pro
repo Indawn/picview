@@ -26,11 +26,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    picfunction.cpp
+    imgfun.cpp
 
 HEADERS += \
-        mainwindow.h \
-    picfunction.h
+        mainwindow.h
 
 FORMS += \
         mainwindow.ui
