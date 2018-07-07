@@ -95,9 +95,10 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionGrey_triggered()
 {
-    mat_opened = imread("D:\\图片\\background (3).jpg");
-    ui->pic_label0->clear();
-       ui->pic_label0->setPixmap(QPixmap::fromImage(cvMat2QImage(mat_opened)));
-    ui->pic_label0->show();
-
+    cvtColor(mat_opened, mat_opened, CV_RGB2GRAY);
+    // mat_opened = imread("D:\\图片\\background (3).jpg");
+    //   ui->pic_label0->clear();
+    //    ui->pic_label0->setPixmap(QPixmap::fromImage(cvMat2QImage(mat_opened)));
+    // ui->pic_label0->show();
+    scaledmat2label(mat_opened, ui->pic_label0);
 }
